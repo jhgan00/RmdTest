@@ -1,0 +1,111 @@
+---
+title: "01. Using crosstalk"
+author: "Jeonghyun Gan"
+output: 
+  html_document:
+    code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+모든 내용은 [Rsudio Crosstalk Github](https://rstudio.github.io/crosstalk)를 참고하여 작성되었습니다.
+
+- [00.About crosstalk](https://jhgan00.github.io/crosstalk/index.html)
+- [01.Using crosstalk](https://jhgan00.github.io/crosstalk/01.UsingCrosstalk.html)
+
+### 01. Installation
+
+Crosstalk 하나의 Rmarkdown 문서 혹은 Shiny 앱에서 여러 위젯의 연동 기능을 제공합니다(아직은 Crosstalk과 연동 가능한 HTML 위젯은 제한적입니다). 이번 장에서는 Rmarkdown과 `d3scatter`, `leaflet` 패키지를 통해서 실습을 진행합니다. 먼저 깃허브에서 `crosstalk`, `d3scatter`, `leaflet` 패키지를 다운로드하고 불러옵니다.
+
+```{r eval=F}
+devtools::install_github("rstudio/crosstalk")
+devtools::install_github("jcheng5/d3scatter")
+devtools::install_github("rstudio/leaflet")
+```
+
+```{r message=F, warning=F}
+library(crosstalk) 
+library(d3scatter)
+library(leaflet)
+```
+
+Crosstalk은 데이터프레임(혹은 데이터프레임과 유사한 객체)을 입력으로 받는 HTML 위젯들에서 작동하도록 설계되었습니다. 예를 들면, `d3catter` 패키지는 다음과 같이 데이터프레임을 입력으로 받습니다. 다음은 `d3scatter` 패키지를 이용해 그린 아이리스 데이터의 산점도입니다.
+
+```{r}
+# iris 데이터
+head(iris)
+d3scatter(iris, ~Petal.Length, ~Petal.Width, ~Species)
+```
+
+이제 `crosstalk`을 활용하여 플롯을 구성해볼 것입니다. 먼저 `SharedData` 클래스로 데이터프레임을 감싸주고, 이 결과물을 HTML 위젯에 전달해주면 됩니다. 코드는 다음과 같습니다. `iris` 데이터프레임이 들어갔던 자리에 `shared_iris` 객체를 전달해주었습니다.
+
+```{r}
+# SharedData 구성
+shared_iris = SharedData$new(iris)
+# d3scatter를 이용해 플롯
+d3scatter(shared_iris, ~Petal.Length, ~Petal.Width, ~Species)
+```
+
+### Linked Brushing
+
+Crosstalk은 두 개 이상의 플롯에서 활용할 때 의미가 있습니다. 이번에는 서로 다른 두 개의 위젯에 `SharedData`를 전달해볼 것입니다. `SharedData`를 구성한 후, `d3scatter`에 전달해서 그래프를 그리고, `bscols`를 이용하여 두 개의 플롯을 나란히 배치하였습니다. 하나의 플롯에서 브러싱을 해보면, 다른 플롯의 동일한 데이터 포인트에도 브러싱이 적용되는 것을 알 수 있습니다. 이는 두 플롯이 하나의 공유 데이터에 기반하여 만들어지기 때문에 가능합니다. 만약 두 개의 다른 SharedData를 각각의 `d3scatter` 플롯에 전달한다면, 링크가 작동하지 않을 것입니다.
+
+```{r}
+# SharedData 구성
+shared_iris = SharedData$new(iris)
+# bscols를 이용해 두 개의 위젯 나란히 배치
+bscols(
+  d3scatter(shared_iris, ~Petal.Length, ~Petal.Width, ~Species, width="100%", height=300),
+  d3scatter(shared_iris, ~Sepal.Length, ~Sepal.Width, ~Species, width="100%", height=300)
+)
+```
+
+Crosstalk은 세 개 이상의 위젯, 혹은 서로 다른 타입의 위젯(예를 들면 지도와 산점도)들을 연동시킬 수도 있습니다. 사실, Crosstalk과 호환 가능한는 모든 위젯들은 서로 연동될 수 있습니다. 다음은 `leaflet` 패키지를 이용해 지도를 그리고 `d3scatter` 패키지를 이용해 산점도를 그린 후 두 위젯을 연동시킨 예제입니다. `quakes` 데이터프레임에서 100개의 데이터 포인트를 추출하고, 이를 `SharedData` 클래스로 감싸줍니다. 이 객체를 `leaflet`과 `descatter`에 각각 전달하여 두 개의 위젯을 생성하고, `bscols`함수를 활용하여 나란히 배열합니다. 지도 혹은 산점도에서 브러싱을 적용하면, 반대편에서도 동일한 데이터 포인트에 브러싱이 적용되는 것을 확인할 수 있습니다.
+
+```{r}
+# quakes 데이터
+head(quakes)
+
+# SharedData 구성
+shared_quakes = SharedData$new(quakes[sample(nrow(quakes),100),])
+
+# bscols를 이용해 두 개의 위젯 나란히 배치
+bscols(
+  leaflet(shared_quakes, width="100%", height=300) %>%
+    addTiles() %>%
+    addMarkers(), # leaflet 패키지를 이용해 지도와 마커 표시
+  d3scatter(shared_quakes, ~depth, ~mag, width="100%", height=300) # d3scatter 패키지를 이용해 산점도 생성
+)
+```
+
+### Filters
+
+앞선 예제들에서는 linked brushing에 대해서 다루었습니다. 이번 절에서는 데이터 필터링 기능을 다루어볼 것입니다. Shiny의 입력 위젯들에 익숙하신 분이라면, crosstalk의 입력 위젯들이 shiny와 유사하다고 느끼실 것입니다. 하지만 crosstalk은 shiny를 필요로 하지 않으며, 정적인 HTML 문서에서도 잘 작동합니다. 다음은 세 가지 필터 입력을 통해서 두 개의 플롯을 컨트롤하는 예제입니다. `filter_checkbox`, `filter_slider`, `filter_select`에 공유 데이터인 `shared_mtcars`를 전달하여 같은 데이터에 대한 서로 다른 세 가지 필터를 만들었습니다. 이후 같은 데이터를 `d3scatter`에 전달하여 두 개의 플롯을 생성하였습니다. 
+
+```{r}
+# mtcars 데이터
+head(mtcars)
+
+#SharedData 생성
+shared_mtcars = SharedData$new(mtcars)
+
+# bscols를 이용해 입력 위젯와 플롯 나란히 배치
+bscols(
+  list(
+    # 체크박스(실린더, 범주형) 필터 생성
+    filter_checkbox("cyl", "Cylinders", shared_mtcars, ~cyl, inline=T),
+    # 슬라이더 필터(마력, 연속형) 생성
+    filter_slider("hp","Hosepower", shared_mtcars, ~hp, width="100%"),
+    # 선택형(자동/수동, 범주형) 필터 생성
+    filter_select("auto","Automatic", shared_mtcars, ~ifelse(am==0, "Yes", "No"))),
+  d3scatter(shared_mtcars, ~wt, ~mpg, ~factor(cyl), width="100%",
+             height=250),
+  d3scatter(shared_mtcars, ~hp, ~qsec, ~factor(cyl), width="100%",
+             height=250)
+  
+)
+```
+
+위의 예제에서 사용된 `filter_` 함수들은 `crosstalk` 패키지의 함수들이지만, 다른 패키지의 필터 입력 위젯들도 사용할 수 있습니다. 
