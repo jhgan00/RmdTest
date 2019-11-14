@@ -1,10 +1,16 @@
 ---
-title: "00. About Crosstalk"
+title: "About Crosstalk"
 author: "JeonghyunGan"
 date: '2019 11 14 '
 output: 
   html_document:
     code_folding: hide
+    toc: true
+    toc_float: true
+    toc_collapsed: tru
+    toc_depth: 3
+    theme: flatly
+    css: "assets/typo.css"
 ---
 
 ```{r setup, include=FALSE}
@@ -14,33 +20,49 @@ knitr::opts_chunk$set(echo = TRUE)
 모든 내용은 [Rsudio Crosstalk Github](https://rstudio.github.io/crosstalk)를 참고하여 작성되었습니다.
 
 - [00.About crosstalk](https://jhgan00.github.io/crosstalk/index.html)
-- [01.Using crosstalk](https://jhgan00.github.io/crosstalk/01.UsingCrosstalk.html)
+- [01.Using crosstalk](https://jhgan00.github.io/crosstalk/UsingCrosstalk.html)
 
-```{r message=F, warning=F}
-library(crosstalk)
-library(d3scatter)
-library(leaflet)
-```
+### 1. About Crosstalk
 
-### About Crosstalk
+`crosstalk`은 `htmlwidgets`의 애드온 패키지이며, 공유 데이터를 바탕으로 HTML 위젯 간의 상호작용(링크 브러싱, 필터링 등) 기능을 구현하였습니다. `crosstalk`은 데이터프레임을 입력을 받는 HTML 위젯들에서 작동하며, 별다른 런타임 의존성을 갖지 않는다는 장점이 있습니다. 즉 단순히 R마크다운과 `crosstalk`만을 가지고도 Amazon S3, Github, RPubs 등에 호스팅될 수 있는 정적 HTML 문서를 만들어낼 수 있습니다. `crosstalk`의 주요한 한계점들은 다음과 같습니다.
 
-```{r message=F, warning=F}
-shared_quakes = SharedData$new(quakes[sample(nrow(quakes),100),])
-bscols(
-  leaflet(shared_quakes, width="100%", height=300) %>%
-    addTiles() %>%
-    addMarkers(),
-  d3scatter(shared_quakes, ~depth, ~mag, width="100%", height=300)
-)
-```
+1. **저작자가 직접 HTML 위젯을 적절히 수정해야 한다**. `crosstalk`은 스스로 위젯들을 연동시켜주지는 않는다.
+
+2. **Crosstalk은 개별 데이터 포인트에 대해서만 작동하며, 데이터의 결합이나 요약을 표현하는 위젯들에는 작동하지 않는다.** 예를 들어서 개별 데이터 포인트를 표현하는 산점도에는 적용될 수 있지만, 히스토그램에는 적용될 수 없다.
+
+3. `crosstalk`은 **큰 데이터에 적합하지 않다**. 모든 데이터가 브라우저에 로드되어야 하기 때문이다.
 
 
-Crosstalk은 `htmlwidgets`의 add-on 패키지이며, 여러 위젯들이 공유하는 데이터(SharedData)를 바탕으로 HTML 위젯 간의 상호작용(linked brushing, filtering 등) 기능을 구현하였습니다. Crosstalk은 데이터프레임을 입력을 받는 HTML 위젯들에서 작하며, 별다른 런타임 의존성을 갖지 않는다는 장점이 있습니다. 즉 단순히 Rmarkdown과 Crosstalk만을 가지고도 아마존S3, 깃허브, RPubs 등에 호스팅될 수 있는 정적 HTML 문서를 생산할 수 있습니다. 
+### 2. Compatiable Widgets & Exmaples
 
-Crosstalk의 주요한 한계점들은 다음과 같습니다.
+`crosstalk`과 연동되는 대표적인 패키지들은 다음과 같습니다.
 
-1. **저작자가 직접 HTML 위젯을 적절히 수정해야 한다**. Crosstalk은 스스로 위젯들을 연동시켜주지는 않는다.
+1. [Plotly](https://plotly-r.com/)
+  
+- example 추가 예정
 
-2. 현재로써는, **Crosstalk은 개별 data point에 대해서만 작동하며, 데이터의 결합이나 요약을 표현하는 위젯들에는 작동하지 않는다.** 예를 들어서 개별 data point를 표현하는 산점도에는 Crosstalk이 적용될 수 있지만, 히스토그램에는 Crosstalk이 적용될 수 없다.
+---
 
-3. Crosstalk은 **큰 데이터에 적합하지 않다**. 모든 데이터가 브라우저에 로드되어야 하기 때문이다.
+2. [Leftlet](https://rstudio.github.io/leaflet/)
+
+- example 추가 예정
+
+---
+
+3. [DT](https://rstudio.github.io/DT/)
+
+- example 추가 예정
+
+---
+
+4. [SummaryWidget](https://kent37.github.io/summarywidget/)
+
+- example 추가 예정
+
+---
+
+5. [rgl](https://r-forge.r-project.org/projects/rgl/)
+
+- example 추가 예정
+
+
