@@ -1306,7 +1306,7 @@ window.initializeCodeFolding = function(show) {
 
     // create a collapsable div to wrap the code in
     var div = $('<div class="collapse r-code-collapse"></div>');
-    if (show || $(this)[0].classList.contains('fold-show'))
+    if (show)
       div.addClass('in');
     var id = 'rcode-643E0F36' + currentIndex++;
     div.attr('id', id);
@@ -1430,6 +1430,7 @@ code {
 }
 img {
   max-width:100%;
+  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -1657,6 +1658,20 @@ div.tocify {
 </ol>
 <ul>
 <li>example 추가 예정</li>
+</ul>
+</div>
+<div id="-" class="section level3">
+<h3>참고 문헌</h3>
+<ul>
+<li>Reproducibility in Production
+<ul>
+<li><a href="https://resources.rstudio.com/webinars/reproducibility-in-production">Part 1: Reproducibility in Production - Garrett Grolemund</a></li>
+<li><a href="https://resources.rstudio.com/webinars/rstudio-connect-in-production">Part 2: RStudio Connect in Production - Thomas Mock</a></li>
+<li><a href="http://pages.rstudio.net/InteractivityinProduction_WebinarRegistration.html">Part 3: Interactivity in Production - Kelly O’Briant</a></li>
+</ul></li>
+<li><a href="https://statkclee.github.io/data-product/dp-koei-three-kingdoms-powers.html">코에이(Koei) 삼국지 국력비교</a></li>
+<li><a href="https://rstudio.github.io/shinydashboard/"><code>shinydashboard</code></a></li>
+<li><a href="https://statkclee.github.io/ds-authoring/ds-kofac-writing.html#/">데이터 과학 시대 재현가능한 글쓰기</a>, 한국과학창의재단, “2019 소프트웨어(SW) 정보교육 담당 교원 대상 연수”, 11월 9일, 대전 인터시티 호텔</li>
 </ul>
 </div>
 
