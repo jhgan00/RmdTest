@@ -66,3 +66,14 @@ knitr::opts_chunk$set(echo = TRUE)
 - example 추가 예정
 
 
+### 참고 문헌
+
+- Reproducibility in Production
+    - [Part 1: Reproducibility in Production - Garrett Grolemund](https://resources.rstudio.com/webinars/reproducibility-in-production)
+    - [Part 2: RStudio Connect in Production - Thomas Mock](https://resources.rstudio.com/webinars/rstudio-connect-in-production)
+    - [Part 3: Interactivity in Production - Kelly O’Briant](http://pages.rstudio.net/InteractivityinProduction_WebinarRegistration.html)
+- [코에이(Koei) 삼국지 국력비교](https://statkclee.github.io/data-product/dp-koei-three-kingdoms-powers.html)
+- [`shinydashboard`](https://rstudio.github.io/shinydashboard/)
+- [데이터 과학 시대 재현가능한 글쓰기](https://statkclee.github.io/ds-authoring/ds-kofac-writing.html#/), 한국과학창의재단, "2019 소프트웨어(SW) 정보교육 담당 교원 대상 연수", 11월 9일, 대전 인터시티 호텔
+
+
