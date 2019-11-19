@@ -33,7 +33,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Garrett Grolemund는 Rstudio에서 생산될 수 있는 computational documents의 다섯 단계를 위와 같이 구분합니다. 이 글에서는 3단계, HTML 위젯을 포함한 R마크다운 문서부터 시작하여 로컬에서 가능한 수준의 샤이니 대시보드까지를 다룰 에정입니다.
 
-
 ---
 
 

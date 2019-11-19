@@ -17,28 +17,21 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### 1. Intro
-
-```{r message=F, warning=F}
-library(tidyverse)
-library(gridExtra)
-library(grid)
-library(readxl)
-```
+## 1. Intro
 
 `htmlwidgets`는 자바스크립트를 R에 임베딩하는 프레임워크이며, `htmlwidgets`를 통해 만들어진 결과물들은 interactivity를 제외하면 다른 R 플롯과 동일하게 작동합니다. 수많은 R 패키지들이 `htmlwidgets`를 통해 개발되었고, [htmlwidgets 갤러리](http://gallery.htmlwidgets.org/)를 방문하시면 그 목록들을 확인해볼 수 있습니다. 물론 이 글에서 이 패키지들을 전부 다룰 수는 없으며, 대표적인 몇 가지 패키지와 애드온만을 가지고 실습을 진행할 것입니다.
 
-이번 장에서 활용할 데이터는 코에이의 시뮬레이션 게임 '삼국지13'의 도시별 데이터입니다. 먼저 도시별 데이터를 읽어온 후, 필요한 컬럼들을 선택하고 인물에 따라 위, 촉, 오를 구분하였습니다. 위, 촉, 오에 속하지 않는 도시들은 걸러내고 비병역인구와 병역인구를 합쳐 인구 컬럼을 생성하였습니다. 최종적으로 만들어진 데이터는 다음과 같습니다.
-
-- 데이터: https://github.com/statkclee/data-product/blob/gh-pages/data/%EC%82%BC%EA%B5%AD%EC%A7%8013.xlsx
-- 전처리 코드: https://statkclee.github.io/data-product/dp-koei-three-kingdoms.html
+이번 장에서 활용할 데이터는 코에이의 시뮬레이션 게임 **삼국지13**의 도시별 데이터와 무장 데이터입니다. 먼저 도시별 데이터를 읽어온 후, 필요한 컬럼들을 선택하고 인물에 따라 위, 촉, 오를 구분하였습니다. 위, 촉, 오에 속하지 않는 도시들은 걸러내고 비병역인구와 병역인구를 합쳐 인구 컬럼을 생성하였습니다. 최종적으로 만들어진 데이터는 다음과 같습니다. 데이터는 [여기](https://github.com/statkclee/data-product/blob/gh-pages/data/%EC%82%BC%EA%B5%AD%EC%A7%8013.xlsx)에서 다운로드하시면 됩니다.
 
 ```{r message=F, warning=F, cache=T}
+library(tidyverse)
+library(readxl)
+
 # 데이터 읽기
-data = read_excel("data/kingdoms.xlsx", sheet='도시')
+city = read_excel("data/kingdoms.xlsx", sheet='도시')
 
 # 전처리
-data = data %>%
+city = city %>%
   select(지방, 도시, 주, 주도, 군단, 태수, 자금, 군량, 비병역인구, 병역인구, 상업, 농업, 문화) %>% # 필요한 컬럼 선택
   mutate(삼국 = case_when(군단 == "관우" ~ "촉",
                            군단 == "유비" ~ "촉",
@@ -50,43 +43,34 @@ data = data %>%
   filter(!is.na(삼국)) %>% # 위촉오에 속하지 않는 도시 걸러냄
   mutate(인구 = 비병역인구 + 병역인구) # 인구 컬럼 생성
 
-head(data)
+head(city)
 ```
 
-### 2. Interactive datatable
+## 2. Interactive datatable
 
 [DT](https://rstudio.github.io/DT/) 패키지를 통해서 문서 안에 손쉽게 인터랙티브 테이블을 포함할 수 있습니다. `DT::datatable()`을 통해 생성한 결과가 `head(data)`로 출력한 결과보다 훨씬 알아보기 쉽습니다. `DT` 패키지를 통해 생성된 인터랙티브 테이블은 페이지 넘김, 정렬, 검색 등의 기능을 제공합니다. 따라서 문서의 독자는 표로부터 원하는 정보를 보다 쉽게 얻어갈 수 있습니다.
 
 ```{r}
-data %>% DT::datatable()
+city %>% DT::datatable()
 ```
 
-### 3. Interactive plots
+## 3. Interactive plots: `ggplot2`
 
-이번에는 인터랙티브 플롯을 다뤄볼 차례입니다.  많은 R 사용자들에게 익숙한 `ggplot2` 패키지에 `plotly` 패키지를 조합하여 간단한 인터랙티브 플롯들을 다뤄볼 것입니다.
+이번에는 인터랙티브 플롯을 다뤄볼 차례입니다. 많은 R 사용자들에게 익숙한 `ggplot2` 패키지에 `plotly` 패키지를 조합하여 손쉽게 인터랙티브 플롯을 그릴 수 있습니다.
 
-```{r message=F,warning=F}
-library(plotly)
-```
+### 3.1. Tooltips
 
-#### 3.1. Tooltips
-
-
-왼쪽 플로은 `ggplot`패키지를 이용해 그린 산점도를 인터랙티브 플롯으로 바꿔준 예제입니다. 도시별 데이터에서 산점도 객체를 생성한 후, 이 객체를 `ggplotly` 함수에 넣어줍니다. 이제 점 위에 커서를 가져다 대면 국가, 자금, 군량에 대한 툴팁이 표시됩니다. 플롯의 툴팁은 기본적으로 `aes` 에 전달된 모든 정보를 포함합니다. 
+왼쪽 플롯은 `ggplot`패키지를 이용해 그린 산점도를 인터랙티브 플롯으로 바꿔준 예제입니다. 도시별 데이터에서 산점도 객체를 생성한 후, 이 객체를 `ggplotly` 함수에 넣어줍니다. 이제 점 위에 커서를 가져다 대면 국가, 자금, 군량에 대한 툴팁이 표시됩니다. 플롯의 툴팁은 기본적으로 `aes` 에 전달된 모든 정보를 포함합니다. 
 
 오른쪽 플롯은 툴팁을 직접 수정해준 예제입니다. `ggplot`의 `aes`에 `text` 파라미터를 추가하고, 원하는 툴팁 내용을 문자열로 입력해주면 됩니다. 이번 예제에서는 인구 정보를 추가하였습니다. 마지막으로 `ggplotly`함수에 `tooptip='text'`를 넣어주면 끝입니다.
 
 ```{r warning=F, message=F, fig.width=16}
+library(plotly)
+
 font = list(
   family = "나눔스퀘어라운드 Regular",
   size = 14,
   color = "black")
-
-p = data %>%
-  # x축에 자금, y축에 군량, 국가별로 마커 색과 모양 구분
-  ggplot(aes(x=자금, y=군량, color=삼국, shape=삼국)) + 
-  geom_point() + # 산점도
-  theme_bw()
 
 subtitle = list(
   text = "1) 인터랙티브 플롯 예제",
@@ -101,10 +85,15 @@ subtitle = list(
   showarrow = FALSE
 )
 
+p = city %>%
+  # x축에 자금, y축에 군량, 국가별로 마커 색과 모양 구분
+  ggplot(aes(x=자금, y=군량, color=삼국, shape=삼국)) + 
+  geom_point() + # 산점도
+  theme_bw()
 
 p1 = ggplotly(p) %>% hide_legend() %>% layout(annotations=subtitle) # 인터랙티브 플롯으로
 
-p = data %>%
+p = city %>%
   ggplot(aes(x=자금,
              y=군량,
              color=삼국,
@@ -117,35 +106,22 @@ p = data %>%
   geom_point() +
   theme_bw() 
 
-subtitle = list(
-  text = "2) 툴팁 수정 예제",
-  font=font,
-  xref = "paper",
-  yref = "paper",
-  yanchor = "bottom",
-  xanchor = "center",
-  align = "left",
-  x = 0.5,
-  y = 1,
-  showarrow = FALSE
-)
-
 # 툴팁에 text만 표시되도록 tooptip='text' 전달
+subtitle['text'] = "2) 툴팁 수정 예제"
 p2 = ggplotly(p, tooltip='text') %>% layout(annotations=subtitle)
 
-#
 plotly::subplot(p1, p2, margin = 0.025, shareY=T, shareX=T) %>%
-   layout(autosize = F, width = 800, height = 400)
+   layout(autosize = F, width = 800, height = 350)
 ```
 
-#### 3.2. Highlight
+### 3.2. Highlight
 
 이번에는 하이라이트 기능을 통해서 원하는 데이터 포인트를 강조해보도록 하겠습니다. 데이터로부터 `ggplot` 객체를 생성하기 전에, `highlight_key` 함수를 통해서 하이라이트의 키가 될 변수를 설정해줍니다. 이후에는 똑같이 `ggplotly` 객체를 생성해주면 됩니다. 마지막으로 `ggplotly` 객체를 `highlight` 함수에 넣어서 하이라이트 플롯을 생성합니다. `highlight` 함수의 파라미터에 대한 더 구체적인 설명은 [여기](https://www.rdocumentation.org/packages/plotly/versions/4.9.0/topics/highlight)를 참고해주세요.
 
 
-```{r}
+```{r message=F, warning=F}
 # 하이라이트 키가 될 변수를 지정해줍니다.
-kingdoms_highlight = highlight_key(data, ~삼국)
+kingdoms_highlight = highlight_key(city, ~삼국)
 
 # ggplot 객체를 생성합니다.
 p = kingdoms_highlight %>% 
@@ -173,10 +149,73 @@ highlight(highlight_gg,
 ```
 
 
-### 4. Interactive maps
+### 3.3. Other Examples
 
+위에서 살펴본 기법들을 다른 형식의 플롯들에도 적용해보겠습니다. 일단 추가적으로 사용할 삼국지 무장 데이터를 준비해줍니다. 도시를 통해서 무장의 소속 국가를 매칭하고, 위촉오 삼국에 속하지 않는 무장들을 걸러냈습니다. 완성된 데이터는 다음과 같습니다.
 
+```{r warning=F,message=F}
+general = read_excel("data/kingdoms.xlsx", sheet="무장")
 
+# city 데이터의 '도시'와 '삼국' 컬럼을 뽑아내줍니다.
+mapping = city %>% select(소재=도시, 삼국)
+
+general = general %>% 
+  select(무장, 군단, 소속, 소재, 성별, 통솔=원시통솔, 무력=원시무력, 지력=원시지력, 정치=원시정치, 생년, 등장년, 졸년, 혈연) %>% 
+  left_join(mapping) %>% 
+  filter(!is.na(삼국)) %>% 
+  mutate(삼국 = factor(삼국, levels=c("위", "오", "촉")))
+
+general %>% 
+  select(삼국, everything()) %>% 
+  DT::datatable()
+```
+
+다음은 각 무장의 주요 능력을 통해 성향을 분류하고, 국가별로 무장의 성향 비율을 표현한 예제입니다. 산점도가 아닌 막대 그래프를 그렸다는 점을 제외하면 앞의 예제들과 거의 같습니다. 먼저 `which.max` 함수를 통해서 장수의 가장 뛰어난 능력이 무엇인지를 파악하고, 이 결과를 `general` 데이터에 추가해줍니다. 다음으로 국가별/성향별 장수 비율을 계산하고, 하이라이트 키를 지정해줍니다 하이라이트 키를 지정한 데이터로 막대 그래프를 그리고 `facet_wrap`으로 국가를 분리해줍니다. 이를 인터랙티브 플롯으로 만들어 주면 끝입니다.
+
+```{r warning=F, message=F}
+# 각 무장의 성향을 분류합니다
+chartype = c("통솔","무력","지력","정치")[apply(general %>% select(통솔, 무력, 지력, 정치), 1, which.max)]
+
+# general 데이터프레임에 성향을 붙여줍니다
+general = general %>% mutate(성향 = chartype)
+
+# 국가별로 각 성향의 무장 비율을 계산합니다
+main = general %>%
+  group_by(삼국, 성향) %>%
+  summarise(count = n()) %>%
+  group_by(삼국) %>%
+  mutate(total = sum(count)) %>%
+  mutate(비율 = count/total) 
+
+# 하이라이트 키를 성향으로 지정해줍니다.
+main_highlight = highlight_key(main, ~성향)
+
+# 막대 그래프를 그린 후 facet_wrap 함수를 통해 국가별로 분리합니다.
+p = main_highlight %>%
+  ggplot(aes(x=성향,
+             y=비율,
+             fill = 성향,
+             text=paste0("국가 :", 삼국, "\n",
+                         "성향 :", 성향, "\n",
+                         "비율 :", round(비율,2)))) +
+  geom_bar(stat='identity') +
+  facet_wrap(삼국 ~.) +
+  theme_bw()
+
+# 인터랙티브 플롯을 생성합니다.
+highlight_gg = ggplotly(p, tooltip = "text")
+highlight(highlight_gg, on = "plotly_click", selectize = F)
+```
+
+이번에는 각 국가별, 연도별 무장의 수를 선 그래프로 나타내보겠습니다.
+
+```{r}
+start = min(general$등장년)
+end = max(general$졸년)
+
+(start:end) %>% 
+  lapply(function(x){return(general$등장년<=x & general$졸년>x)})
+```
 ---
 
 
