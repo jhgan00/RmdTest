@@ -17,9 +17,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-- [00.Computatinal Documents](https://jhgan00.github.io/crosstalk/index.html)
-- [01.Rmarkdown with HTML widgets(1)](https://jhgan00.github.io/crosstalk/widgets.html)
-- [02.Rmarkdown with HTML widgets(2)](https://jhgan00.github.io/crosstalk/widgets_cross.html)
+- [00.Computatinal Documents](https://jhgan00.github.io/computational_docs/index.html)
+- [01.Rmarkdown with HTML widgets(1)](https://jhgan00.github.io/computational_docs/widgets.html)
+- [02.Rmarkdown with HTML widgets(2)](https://jhgan00.github.io/computational_docs/widgets_cross.html)
 
 ### Computational Documents
 
