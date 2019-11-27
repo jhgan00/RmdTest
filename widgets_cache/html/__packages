@@ -9,4 +9,4 @@ dplyr
 stringr
 forcats
 readxl
-htmlwidgets
+plotly

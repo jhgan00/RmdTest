@@ -3,13 +3,13 @@ title: "Rmarkdown with HTML widgets (2)"
 author: "Jeonghyun Gan"
 output: 
   html_document:
-    code_folding: show
+    code_folding: hide
     toc: true
     toc_float: true
     toc_collapsed: tru
     toc_depth: 3
     theme: flatly
-    css: "assets/typo.css"
+    css: "assets/css/typo.css"
 ---
 
 ```{r setup, include=FALSE}
