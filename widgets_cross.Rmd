@@ -73,6 +73,7 @@ subplot(p1,p2) %>%
 ```{r warning=F,message=F}
 library(leaflet)
 library(geojsonio)
+library(d3scatter)
 
 shared_elec = SharedData$new(election)
 shared_elec_df = SharedData$new(election@data, group=shared_elec$groupName())
@@ -92,14 +93,13 @@ leaflet(data = shared_elec) %>%
   setView(126.982, 37.5502, zoom=10) %>%
   addPolygons(
     fillColor = ~pal(당선),
-    weight = 2,
+    weight = 1,
     opacity = 1,
     color = "white",
+    dashArray=3,
     fillOpacity = 0.5,
-    label = lapply(labs, htmltools::HTML),
-    highlightOptions = highlightOptions(
-      color = "#00ff00", opacity = 1, weight = 2, fillOpacity = 1,
-      bringToFront = TRUE, sendToBack = TRUE))
+    label = lapply(labs, htmltools::HTML)) %>%
+  addLegend(pal = pal, values = ~당선, opacity = 0.7, title = NULL, position = "bottomright")
 
 p1 = plot_ly(shared_elec_df, x = ~소득, y = ~노령화지수, legendgroup=~당선) %>%
   add_markers(color=~당선, colors=c("#0D7440", "#2A88C5",  "#C10D0D"), opacity=0.6)
