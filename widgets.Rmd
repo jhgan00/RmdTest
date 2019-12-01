@@ -1,5 +1,6 @@
 ---
-title: "Rmarkdown with HTML widgets (1)"
+title: "Computational Documents"
+subtitle: "htmlwidgets: DT, plotly"
 author: "Jeonghyun Gan"
 date: '2019 11 17 '
 output: 
@@ -269,12 +270,45 @@ highlight(highlight_gg, on = "plotly_click", selectize = F) %>%
 
 ## 4. Animations
 
-이번에는 간단한 애니메이션을 적용한 플롯을 다뤄보겠습니다. `gganimate` 패키지를 활용하여 `ggplot` 객체에 애니메이션을 적용하고, gif로 렌더링할 것입니다. 다음 패키지들을 먼저 설치해주세요.
+마지막으로, 간단한 애니메이션을 적용한 플롯을 다뤄보겠습니다. 위에서 만들어둔 `serve`(연도별 무장 수) 데이터는 시계열적 특성을 가지고 있기 때문에 애니메이션을 적용하기 좋습니다. 선 그래프는 데이터의 축적을 통해서 애니메이션으로 표현될 수 있습니다. 이를 위해서 먼저 `accumulate_by` 함수를 정의하였습니다. `accumulate_by` 함수를 통해 만들어진 객체로 선 그래프를 그리고, `aes`에 `frame=frame`을 전달해주면 됩니다. 이후에는 `ggplotly`를 통해 인터랙티브 플롯으로 바꿔주고, 애니메이션 옵션을 설정해주면 끝입니다.
+
+```{r}
+accumulate_by = function(dat, var) {
+  var = lazyeval::f_eval(var, dat)
+  lvls = plotly:::getLevels(var)
+  dats = lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+serve_acc = serve %>%
+  accumulate_by(~연도)
+
+p = serve_acc %>%
+  ggplot(aes(x=연도,
+             y=무장수,
+             text = paste0("연도 :", 연도, "\n",
+                           "국가 :", 국가, "\n",
+                           "무장 수", 무장수, "\n"),
+             frame=frame)) +
+  geom_line(aes(group=국가,color=국가),size=1.2) +
+  theme_bw()
+
+ggplotly(p, tooltip='text') %>% 
+  animation_opts(
+    frame = 100, 
+    transition = 0, 
+    redraw = FALSE
+  )
+```
+
+이번에는 `gganimate` 패키지를 활용하여 `ggplot` 객체에 애니메이션을 적용하고, gif로 렌더링할 것입니다. 위젯을 활용한 방법은 아니지만, 애니메이션을 굳이 인터랙티브하게 구성할 필요가 없다면 `gganimate`를 활용하는 것도 좋은 방법입니다. 다음 패키지들을 먼저 설치해주세요.
 
 - [`gganimate`](https://github.com/thomasp85/gganimate)
 - [`gifski`](https://github.com/r-rust/gifski)
 
-위에서 만들어둔 `serve`(연도별 무장 수) 데이터는 시계열적 특성을 가지고 있기 때문에 애니메이션을 적용하기 좋습니다. 그래프를 그릴 때 사용하눈 문법은 일반적인 `ggplot` 문법과 같으며, `transition_reveal`에 애니메이션의 시간축을 설정해주면 됩니다. 이 결과를 `animate` 함수에 넣고 gif 렌더링을 위해 `renderer = gifski_renderer()`로 지정해주면 끝입니다. 너비와 높이는 원하는대로 지정해주시면 되고, `anim_save`함수를 통해서 결과를 저장하는 것도 가능합니다.
+ 그래프를 그릴 때 사용하눈 문법은 일반적인 `ggplot` 문법과 같으며, `transition_reveal`에 애니메이션의 시간축을 설정해주면 됩니다. 이 결과를 `animate` 함수에 넣고 gif 렌더링을 위해 `renderer = gifski_renderer()`로 지정해주면 끝입니다. 너비와 높이는 원하는대로 지정해주시면 되고, `anim_save`함수를 통해서 결과를 저장하는 것도 가능합니다.
 
 ```{r warning=F, message=F}
 library(gganimate)
@@ -297,9 +331,10 @@ anim_save("assets/fig/anim1.gif")
 ```
 ---
 
-
 ### 참고문헌
 
 - [샤이니 htmlwidgets](https://shiny.rstudio.com/articles/htmlwidgets.html)
 - [코에이(Koei) 삼국지 국력비교](https://statkclee.github.io/data-product/dp-koei-three-kingdoms.html)
 - [데이터 과학 시대 재현가능한 글쓰기](https://statkclee.github.io/ds-authoring/ds-kofac-writing.html#/), 한국과학창의재단, "2019 소프트웨어(SW) 정보교육 담당 교원 대상 연수", 11월 9일, 대전 인터시티 호텔
+- [Cumulative Animations in ggplot2](https://plot.ly/ggplot2/cumulative-animations/)
+- [RStudio Trainer Program](https://statkclee.github.io/rstudio-trainer/viz-lecture-note.html), Tidyverse Korea
