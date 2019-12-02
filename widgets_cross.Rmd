@@ -65,7 +65,7 @@ crosstalk::bscols(points1,points2)
 
 ### 2.2. 지도에 도형 그리기
 
-지리 데이터는 `.shp`, `.json`, `.csv` 등 다양한 형태로 존재합니다. 이번에는 `.json` 형식을 파일을 가지고 실습을 진행해보겠습니다. 실습에 사용할 데이터는 2016년 국회의원 총선의 서울 지역 개표결과 데이터입니다. `geojsonio`패키지를 통해서 `SpatialPolygonsDataFrame` 클래스로 파일을 읽어옵니다. `SpatialPolygonsDataFrame`은 좌표계, 폴리곤 좌표 등의 지리정보와 일반적인 데이터프레임을 결합해놓은 클래스입니다. `election@polygons`를 통해서 폴리곤 리스트에 접근할 수 있고, `election@data`를 통해서 데이터프레임에 접근할 수 있습니다. 
+지리 데이터는 `.shp`, `.json`, `.csv` 등 다양한 형태로 존재합니다. 이번에는 `.json` 형식을 파일을 가지고 실습을 진행해보겠습니다. 실습에 사용할 데이터는 2016년 국회의원 총선의 서울 지역 개표결과 데이터입니다. 전처리  `geojsonio`패키지를 통해서 `SpatialPolygonsDataFrame` 클래스로 파일을 읽어옵니다. `SpatialPolygonsDataFrame`은 좌표계, 폴리곤 좌표 등의 지리정보와 일반적인 데이터프레임을 결합해놓은 클래스입니다. `election@polygons`를 통해서 폴리곤 리스트에 접근할 수 있고, `election@data`를 통해서 데이터프레임에 접근할 수 있습니다. 
 
 ```{r warning=F, message=F}
 election  = geojsonio::geojson_read("data/election.json", what = "sp")
@@ -157,7 +157,7 @@ subplot(p1,p2) %>%
   highlight("plotly_selected")
 ```
 
-크로스톡은 서로 다른 종류의 위젯들 간에도 잘 작동합니다. 다만, 여러 위젯들이 서로 다른 클래스를 필요로 할 경우에는 약간의 조작이 더 필요합니다. 다음은 지도와 산점도, 테이블을 연결한 예제입니다.  `election`의 클래스는 `SpatialPolygonsDataFame`입니다. `plot_ly` 함수는 `SpatialPolygonsDataFrame` 클래스에 대해서 작동하지 않으므로, `election@data`를 별도로 공유 데이터로 만들어주면서  `group=shared_elec$groupName()` 인자를 전달했습니다. 즉 `shared_elec`과 `shared_elec_df`가 한 그룹으로 연결된 상태이고, 연동이 잘 이루어지는 것을 볼 수 있습니다. `shared_elec_dt` 역시 그룹을 지정하여 연동시켰습니다.
+`crosstalk`은 서로 다른 종류의 위젯들 간에도 잘 작동합니다. 다만, 여러 위젯들이 서로 다른 클래스를 필요로 할 경우에는 약간의 조작이 더 필요합니다. 다음은 지도와 산점도, 테이블을 연결한 예제입니다.  `election`의 클래스는 `SpatialPolygonsDataFame`입니다. `plot_ly` 함수는 `SpatialPolygonsDataFrame` 클래스에 대해서 작동하지 않으므로, `election@data`를 별도로 공유 데이터로 만들어주면서  `group=shared_elec$groupName()` 인자를 전달했습니다. 즉 `shared_elec`과 `shared_elec_df`가 한 그룹으로 연결된 상태이고, 연동이 잘 이루어지는 것을 볼 수 있습니다. `shared_elec_dt` 역시 그룹을 지정하여 연동시켰습니다.
 
 ```{r warning=F,message=F}
 library(d3scatter)
@@ -193,3 +193,17 @@ leaflet(shared_elec) %>%
     color = "black")
 ```
 
+### 3.2. Filtering
+
+필터링은 말 그대로 특정 데이터 포인트를 필터링하는 기능이며, 크게 설명할 것이 없습니다. 예제와 함께 보겠습니다. `filter_` 함수에 `SharedData` 넣어서 데이터에 맞는 형태의 필터 인풋을 만들어주면, 데이터를 공유하는 모든 위젯에 필터링이 적용됩니다.
+
+```{r}
+bscols(
+  list(filter_checkbox("당선", "당선", shared_elec_df, ~당선, inline=T),
+       filter_slider("소득", "소득", shared_elec_df, ~소득, width="100%"),
+       filter_select("동", "동", shared_elec_df, ~읍면동명)),
+  d3scatter(shared_elec_df, ~소득, ~기초수급자인원수, ~당선, width="100%", height=250),
+  d3scatter(shared_elec_df, ~소득, ~기초수급자인원수, ~당선, width="100%", height=250)
+)
+DT::datatable(shared_elec_dt, width="100%")
+```
