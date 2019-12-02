@@ -1,5 +1,6 @@
 ---
-title: "Computational Documents: leaflet&crosstalk"
+title: "Computational Documents"
+subtitle: "htmlwidgets: leaflet & crosstalk"
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -17,7 +18,7 @@ library(DT)
 
 election  = geojsonio::geojson_read("data/election.json", what = "sp")
 election@data = election@data %>%
-  mutate(소득 = (소득*0.0001) %>% round)
+  mutate(소득 = (소득*0.0001) %>% round, 노령화지수 = 노령화지수 %>% round)
 
 colnames(election@data) = colnames(election@data) %>% str_replace(" ","")
 
@@ -53,27 +54,35 @@ Inputs {.sidebar data-width=400}
 
 ### 대한민국 제20대 총선
 
-서울 개표결과
+서울특별시 지역구 개표결과
 
 ```{r}
 filter_checkbox("당선", "당선", shared_elec_df, ~당선, inline=T)
-filter_slider("소득", "소득", shared_elec_df, ~소득, width="75%")
-filter_select("동", "동", shared_elec_df, ~읍면동명)
+filter_slider("소득", "소득(만 원)", shared_elec_df, ~소득, width="75%")
+filter_slider("노령화지수", "노령화지수", shared_elec_df, ~노령화지수, width="75%")
+filter_select("행정동", "행정동", shared_elec_df, ~읍면동명)
+filter_select("선거구", "선거구", shared_elec_df, ~선거구)
 ```
 
 ---
 
-This [R Markdown](http://rmarkdown.rstudio.com/) document uses the experimental [crosstalk](https://github.com/rstudio/crosstalk) R package to enable interactivity between different widgets that display the same [Gapminder](https://www.gapminder.org/data/) data.
+[Computational Documents](jhgan00.github.io/computational_docs) 튜토리얼의 예시 문서 입니다.
 
-**Credits:**    
-The following packages were used: 
-[gapminder](https://cran.r-project.org/web/packages/gapminder/index.html),
-[flexdashboard](https://cran.r-project.org/web/packages/flexdashboard/index.html),
-[tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html),
-[countrycode](https://cran.r-project.org/web/packages/countrycode/index.html),
-[sf](https://cran.r-project.org/web/packages/sf/index.html), 
-[rnaturalearth](https://cran.r-project.org/web/packages/rnaturalearth/index.html)
-[leaflet](https://cran.r-project.org/web/packages/leaflet/index.html), [d3scatter](https://github.com/jcheng5/d3scatter), [DT](https://cran.r-project.org/web/packages/DT/index.html). 
+**Contact:**
+
+- jhgan00@gmail.com
+
+
+**Github Repo:**
+
+- https://github.com/jhgan00/computational_docs
+
+
+**Reference:**
+
+- [Gapminder data using crosstalk](https://rpubs.com/rcatlord/gapminder_crosstalk_updated)
+- [flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/layouts.html)
+- [국회의원 선거 예측](https://github.com/lhmlhm1111/Data_GongHak), 연세대학교 데이터공학 4달러 조
 
 
 Column {data-height=450}
@@ -102,8 +111,7 @@ leaflet(shared_elec) %>%
     color = "white",
     dashArray=3,
     fillOpacity = 0.5,
-    label = lapply(labs, htmltools::HTML),
-    highlightOptions=highlightOptions(bringToFront = F)) %>%
+    label = lapply(labs, htmltools::HTML)) %>%
   addLegend(pal = pal, values = ~당선, opacity = 0.7, title = NULL, position = "bottomright") %>%
   addPolylines(
     data=election_gu,
@@ -116,6 +124,6 @@ leaflet(shared_elec) %>%
 ### Plot
 
 ```{r plot}
-d3scatter(shared_elec_df, ~소득, ~기초수급자인원수, ~당선, width="100%", height=250)
+d3scatter(shared_elec_df, ~소득, ~노령화지수, ~당선, width="100%", height=250)
 ```
 

@@ -1,6 +1,6 @@
 ---
 title: "Computational Documents"
-subtitle: "htmlwidgets: DT, plotly"
+subtitle: "htmlwidgets: DT & plotly"
 author: "Jeonghyun Gan"
 date: '2019 11 17 '
 output: 
@@ -19,8 +19,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 - [00.Computatinal Documents](https://jhgan00.github.io/computational_docs/index.html)
-- [01.Rmarkdown with HTML widgets(1)](https://jhgan00.github.io/computational_docs/widgets.html)
-- [02.Rmarkdown with HTML widgets(2)](https://jhgan00.github.io/computational_docs/widgets_cross.html)
+- [01.htmlwidgets: DT, plotly](https://jhgan00.github.io/computational_docs/widgets.html)
+- [02.htmlwidgets: leaflet & crosstalk](https://jhgan00.github.io/computational_docs/widgets_cross.html)
+- [03.example: 2016 총선 시각화](https://jhgan00.github.io/computational_docs/election2016.html)
 
 ## 1. Intro
 

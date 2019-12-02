@@ -18,8 +18,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 - [00.Computatinal Documents](https://jhgan00.github.io/computational_docs/index.html)
-- [01.Rmarkdown with HTML widgets(1)](https://jhgan00.github.io/computational_docs/widgets.html)
-- [02.Rmarkdown with HTML widgets(2)](https://jhgan00.github.io/computational_docs/widgets_cross.html)
+- [01.htmlwidgets: DT, plotly](https://jhgan00.github.io/computational_docs/widgets.html)
+- [02.htmlwidgets: leaflet & crosstalk](https://jhgan00.github.io/computational_docs/widgets_cross.html)
+- [03.example: 2016 총선 시각화](https://jhgan00.github.io/computational_docs/election2016.html)
 
 ## 1. Intro
 
@@ -207,3 +208,17 @@ bscols(
 )
 DT::datatable(shared_elec_dt, width="100%")
 ```
+
+### 3.3. `flexdashboard`
+
+마지막으로, 이번 장에서 다룬 내용들과 `flexdashboard`를 활용하여 대시보드를 구현하였습니다. 결과물과 코드는 [여기](https://jhgan00.github.io/computational_docs/election2016)에서 확인하실 수 있습니다.
+
+---
+
+
+## 참고문헌
+
+- [국회의원 선거 예측](https://github.com/lhmlhm1111/Data_GongHak), 연세대학교 데이터공학 4달러 조
+- [Crosstalk](https://rstudio.github.io/crosstalk/)
+- [Leaflet](https://rstudio.github.io/leaflet/)
+- [Gapminder data using crosstalk](https://rpubs.com/rcatlord/gapminder_crosstalk_updated)
