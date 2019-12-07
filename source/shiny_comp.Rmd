@@ -1,0 +1,121 @@
+---
+title: "Computational Documents"
+subtitle: "Shiny Components"
+author: "Jeonghyun Gan"
+output: 
+  html_document:
+    code_folding: hide
+    toc: true
+    toc_float: true
+    toc_collapsed: tru
+    toc_depth: 3
+    theme: flatly
+    css: "assets/css/typo.css"
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+- [00. Computatinal Documents](https://jhgan00.github.io/computational_docs/index.html)
+- [01. Html Widgets: DT, plotly](https://jhgan00.github.io/computational_docs/widgets1.html)
+- [02. Html Widgets: leaflet & crosstalk](https://jhgan00.github.io/computational_docs/widgets2.html)
+- [03. Example: 2016 총선 시각화](https://jhgan00.github.io/computational_docs/election2016.html)
+- [04. Shiny Components](https://jhgan00.shinyapps.io/shiny_comp/)
+
+## 0. Intro
+
+`shiny`는 인터랙티브 웹 앱 제작을 위한 R 패키지입니다. 웹 개발에 대한 전문적인 지식 없이도, R에 대한 이해만 있다면 샤이니 앱을 쉽게 제작할 수 있습니다. 이번 장에서는 우선 샤이니 요소들을 포함한 R 마크다운 문서에 대해 다룰 것입니다. 우선 다음과 같이 마크다운 문서의 YAML 메타데이터에 `runtime: shiny`를 추가해주세요. Rstudio가 해당 문서를 샤이니 문서로 인식하면, 니트 버튼이 Run Document 버튼으로 바뀌었을 것입니다. 
+
+```
+---
+title: "Shiny Document"
+output: html_document
+runtime: shiny
+---
+```
+
+YAML을 수정하고 Run Document를 실행해보면, HTML 파일이 생성되지 않을 것입니다. 샤이니 런타임 의존성을 갖는 문서는 정적인 HTML 문서로 렌더링될 수 없으며, Github이나 RPubs 등에 의해서 호스팅될 수 없습니다. 즉 샤이니 문서/앱을 배포하기 위해서는 별도의 서버가 필요하며, shinyapps.io를 이용하거나 자신만의 shiny server를 구성할 수도 있습니다. 본론에 들어가기 전에 shinyapps.io 통해서 샤이니를 배포할 준비를 먼저 해보겠습니다. 배포에 관심이 없는 분들은 이 부분을 건너뛰어도 무방합니다.
+
+1. [shinyapps.io](https://www.shinyapps.io/) 계정을 생성합니다.
+
+2. `rsconnect` 패키지를 설치합니다: `install.packages("rsconnect")`
+
+3. `rsconnect` 패키지를 통해 계정 승인을 진행합니다. shinyapps.io에 로그인헤서 Dashboard 탭을 클릭하면 도움말과 자신의 승인 정보를 확인할 수 있습니다. 콘솔에서 `setAccountInfo` 함수로 계정을 승인해주시기 바랍니다.
+
+```{r eval=F}
+rsconnect::setAccountInfo(
+  name='your_name',
+  token='your_token',
+  secret='your_secret')
+```
+
+
+4. 이제 문서/앱을 배포할 준비가 끝났습니다. 앱이 정상적으로 배포되는지 테스트해보겠습니다. 먼저 아래 샘플 코드를 문서에 포함해주세요. 
+
+```{r}
+crosstalk::bscols(
+  widths=c(3,NA),
+  numericInput("rows", "How many cars?", 5),
+  renderTable({
+    head(cars, input$rows)})
+)
+```
+
+콘솔에서 `deployApp("path/to/your/document.Rmd")`를 실행해주세요. 배포가 완료되면, 지금 보고계신 페이지와 같이 샤이니가 작동는지 확인해주세요. 앱이나 문서를 수정하셨다면, `deployApp()`을 다시 실행해주기만 하면 됩니다.
+
+## 1. Input & render
+
+샤이니를 사용하여 만들고자 하는 것은 사용자의 입력에 반응하여 그에 맞는 출력을 내놓는 응용 프로그램입니다. 즉 사용자의 입력(input)이 있어야 하고, 입력에 적절히 반응하여 출력할 객체(output)을 만들어내야(render) 합니다. 이 흐름을 염두에 두고 글을 읽어주시기 바랍니다.
+
+샤이니의 입력 인터페이스는 `~Input` 함수를 통해서 만들 수 있으며, 모든 입력 인터페이스는 고유한 아이디를 가집니다. 아래 예제에서는 `numericInput()` 함수에 `"inputId=rows"`를 전달하여 `"rows"`라는 아이디를 갖는 숫자 입력 인터페이스를 만들었습니다. **해당 인터페이스를 통해 입력이 들어오면 `input$rows`를 통해서 입력값에 접근할 수 있습니다.** `renderTable({...})` 부분은 이 입력값을 `head` 함수의 인자로 전달하고, 이 결과를 표로 렌더링하는 코드입니다.
+
+```{r}
+crosstalk::bscols(
+  widths=c(3,NA),
+  numericInput("rows", "How many cars?", 5),
+  renderTable({
+    head(cars, input$rows)})
+)
+```
+
+이제 다른 `Input`과 `render` 함수들을 활용하는 예제들을 살펴보겠습니다. 위에서 다룬 `Input` > `render`의 흐름, 그리고 `Input$id`를 통해 입력된 값에 접근하는 방법을 이해하셨다면 다음의 예제들은 크게 어렵지 않을 것입니다.
+
+### 1.1. 단순선형회귀모형
+
+아래는 사용자가 선택한 x,y 변수를 가지고 산점도와 선형회귀 결과를 출력한 예제입니다. `bscols` 함수는 역시 단순히 배열을 위해서 사용한 것으로, `shiny` 구성 요소들에는 아무런 영향을 주지 않습니다. 먼저 사용자가 변수를 선택할 수 있도록 두 개의 `selectInput`을 생성합니다. 다음으로 `renderPlot()` 안에 `ggplot` 객체를 집어넣어줍니다. 사용자의 입력이 문자열 데이터로 들어온다는 점에 유의하여 플롯을 그려주시면 됩니다. 마지막으로 `renderPrint` 안에는 선형회귀모형의 요약 결과를 넣어주었습니다. 역시 사용자의 입력이 문자열 데이터로 들어온다는 점에 유의하여 코딩해주시면 됩니다.
+
+```{r warning=F,message=F}
+library(tidyverse)
+library(plotly)
+
+data("mtcars")
+
+vars = mtcars %>% select(disp,hp,drat,wt,qsec,mpg) %>% colnames
+
+crosstalk::bscols(
+  widths=c(3,NA),
+  # 입력 인터페이스 구성
+  list(
+    selectInput("xvar", "X variable", vars, selected="hp"),
+    selectInput("yvar", "Y variable", vars, selected="mpg")),
+  # renderPlot: 그래프 출력
+  renderPlot({
+    mtcars %>%
+      ggplot(aes_string(x=input$xvar, y=input$yvar)) +
+      geom_point(aes(color=factor(am))) +
+      geom_smooth(method = "lm") +
+      labs(title=paste0("Simple Linear Regression: ",input$yvar,"~",y=input$xvar))
+    })
+  )
+
+# renderPrint: 텍스트 출력
+renderPrint({lm(mtcars[,input$xvar] ~ mtcars[,input$xvar]) %>% summary})
+```
+
+### 2. 
+
+```{r warning=F,message=F}
+
+```
