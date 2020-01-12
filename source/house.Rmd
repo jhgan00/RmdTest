@@ -1,0 +1,86 @@
+---
+title: "913 부동산대책"
+author: "Jeonghyun Gan"
+date: '2019 12 15 '
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(plotly)
+```
+
+## 1. 데이터 전처리
+
+서울시의 아파트 매매가 거래 데이터를 연도별로 읽어와서 합치고 간단한 전처리를 해준다.
+
+```{r eval=F}
+datalist = list()
+filelist = list.files("data/house")
+
+for (i in 1:length(filelist)){
+  filename = filelist[i]
+  print(filename)
+  data = read.csv(paste0("data/house/",filename),skip=15)
+  datalist[[i]] = data
+}
+
+data = bind_rows(datalist)
+
+data = data %>%
+  separate(시군구, into=c("시","구","동"), sep=" ") %>%
+  rename(전용면적=전용면적...,거래금액=거래금액.만원.) %>%
+  mutate(
+    거래금액 = 거래금액 %>% str_replace(",","") %>% as.numeric(),
+    date = paste0(as.character(계약년월), 계약일) %>% as.POSIXct(format="%Y%m%d")) %>%
+  mutate(
+    year = date %>% year,
+    month = date %>% month,
+    day = date %>% day,
+    면적당가격 = 거래금액/전용면적,
+    age = year - 건축년도) %>%
+  select(-계약년월, -계약일, -건축년도)
+
+data %>% write.csv("data/house.csv", row.names=F)
+```
+
+```{r}
+data = read.csv("data/house.csv")
+data %>% DT::datatable()
+```
+
+## 2. EDA
+
+9.13 부동산대책 발표 이후로 아파트 매매의 동향을 살펴보자. 부동산 대책이 발표된 8월에 매매 수량이 급격히 솟았다가 9월을 지나면서 급격히 하락한다. 19년 상반기까지 매매 수량이 매우 적다가 19년 6월부터 매매가 다시 활성화되는 모습을 볼 수 있다.
+
+```{r}
+tmp = data %>%
+  group_by(year,month) %>%
+  summarise(
+    거래건수 = n(),
+    평균거래금액 = mean(거래금액),
+    면적당평균가격 = mean(면적당가격)
+  ) %>%
+  mutate(date = as.character(year*10000 + 100*month + 1) %>% as.POSIXct(format="%Y%m%d"))
+  
+p1 = tmp %>%
+  ggplot(aes(x=date,y=거래건수)) + 
+  geom_line() + geom_point() +
+  ggtitle("월별 아파트(매매) 거래건수") +
+  theme_bw()
+
+p2 = tmp %>%
+  ggplot(aes(x=date,y=평균거래금액)) + 
+  geom_line() + geom_point() +
+  ggtitle("월별 아파트(매매) 총거래금액") +
+  theme_bw()
+
+subplot(
+  ggplotly(p1),
+  ggplotly(p2)
+) %>% layout(width=1200)
+
+
+```
