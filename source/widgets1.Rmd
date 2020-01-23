@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 - [01. Html Widgets: DT, plotly](https://jhgan00.github.io/computational_docs/widgets1.html)
 - [02. Html Widgets: leaflet & crosstalk](https://jhgan00.github.io/computational_docs/widgets2.html)
 - [03. Example: 2016 총선 시각화](https://jhgan00.github.io/computational_docs/election2016.html)
-- [04. Shiny Components](https://jhgan00.shinyapps.io/shiny_comp/)
+- [04. Shiny Components](https://jhgan00.github.io/computational_docs/shiny_comp.html)
 - [05. Shiny App](https://jhgan00.github.io/computational_docs/shiny_app.html)
 - [06. Example: ]()
 
